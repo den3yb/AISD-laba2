@@ -12,39 +12,40 @@ namespace spisok {
 	private:
 		note* _next;
 		note* _prev;
-		T _val;
+		T* _val;
 	public:
-		note() { _next = nullptr; _prev = nullptr; _val = 0; }
-		node(T data) { _next = nullptr; _prev = nullptr; _val = data; }
-		note(note* temp1, note* temp2, T data) { _next = temp1; _prev = temp2; _val = data; }
-		note(note<T>& another){ _next = another._next; _prev = another._prev; _val = another._val; }
-		~note() = default;
+		note() { _next = nullptr; _prev = nullptr; _val = nullptr; }
+		note(T data) { _next = nullptr; _prev = nullptr; _val = new T(data); }
+		note(note* temp1, note* temp2, T data) { _next = temp1; _prev = temp2; _val = new T(data); }
+		note(note<T>& another){ _next = another._next; _prev = another._prev; _val = new T(another._val); }
+		~note() { _next = nullptr; _prev = nullptr; delete _val; };
 		note* get_n() { return _next; }
 		note* get_p() { return _prev; }
-		note* get_v() { return _val; }
+		T* get_v() { return _val; }
 		void set_n(note* next) { _next = next; }
 		void set_p(note* prev) { _prev = prev; }
-		void set_v(T val) {_val = val; }
-		friend std::ostream& operator<< (std::ostream o, note<T>& t) { std::cout << t->get_v(); return o; }
+		void set_v(T* val) {_val = val; }
+		friend ostream& operator<< (ostream& o, note<T>& t) { cout << *(t.get_v())<<" "; return o; }
 		friend bool operator== (note<T> rhs, note<T> lhs) {
-			if (rhs.get_v() == lhs.get_v()) { return false; }
+			if (*(rhs.get_v()) == *(lhs.get_v())) { return false; }
 			else { return true; }
 		}
 		friend bool operator!= (note<T> rhs, note<T> lhs) {
-			if (rhs.get_v() == lhs.get_v()) { return true; }
+			if (*(rhs.get_v()) == *(lhs.get_v())) { return true; }
 			else { return false; }
 		}
+		void operator= (const note<T> lhs) { _next = lhs._next; _prev = lhs._prev; _val = lhs._val;}
+		
 	};
 
 	template <typename T>
 	class twolist {
 	protected:
-
 		note<T>* _head;
 		note<T>* _end;
 	public:
 
-		twolist() { _head(nullptr), _end(nullptr); }
+		twolist() { _head = nullptr; _end=nullptr; }
 
 		twolist(const twolist& another) {
 			_head = nullptr;
@@ -62,17 +63,33 @@ namespace spisok {
 
 
 		void push_head(note<T>* start) {
-			_head->set_p(start);
-			start->set_p(nullptr);
-			start->set_n(_end);
-			_head = start;
+			if (_head == nullptr) {
+				_head = start;
+				_end = start;
+				start->set_n(nullptr);
+				start->set_p(nullptr);
+			}
+			else{
+				_head->set_p(start);
+				start->set_p(nullptr);
+				start->set_n(_end);
+				_head = start; 
+			}
 		}
 
 		void push_end(note<T>* tail) {
-			_end->set_n(tail);
-			tail->set_n(nullptr);
-			tail->set_p(_end);
-			_end = tail;
+			if (_end == nullptr) {
+				_head = tail;
+				_end = tail;
+				tail->set_n(nullptr);
+				tail->set_p(nullptr);
+			}
+			else {
+				_end->set_n(tail);
+				tail->set_n(nullptr);
+				tail->set_p(_end);
+				_end = tail;
+			}
 		}
 
 		void push_head(twolist<T> start) {
@@ -120,13 +137,12 @@ namespace spisok {
 
 		~twolist() = default;
 
-		friend std::ostream& operator<< (std::ostream& out, const twolist<T>& list) {
+		friend ostream& operator<< (ostream& out, twolist<T>& list) {
 			note<T>* start = list._head;
-			while (_head != nullptr) {
-				cout << *start << " ";
-				start = start->get_next();
+			while (start != nullptr) {
+				cout << *start ;
+				start = start->get_n();
 			}
-			cout << *start->get_d() << endl;
 			return out;
 		}
 
