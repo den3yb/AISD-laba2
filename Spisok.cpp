@@ -17,7 +17,7 @@ namespace spisok {
 		note() { _next = nullptr; _prev = nullptr; _val = nullptr; }
 		note(T data) { _next = nullptr; _prev = nullptr; _val = new T(data); }
 		note(note* temp1, note* temp2, T data) { _next = temp1; _prev = temp2; _val = new T(data); }
-		note(note<T>& another){ _next = another._next; _prev = another._prev; _val = new T(another._val); }
+		note(note<T>& another){ _next = another._next; _prev = another._prev; _val = new T(*another._val); }
 		~note() { _next = nullptr; _prev = nullptr; delete _val; };
 		note* get_n() { return _next; }
 		note* get_p() { return _prev; }
@@ -51,16 +51,28 @@ namespace spisok {
 			_head = nullptr;
 			_end = nullptr;
 			note<T>* temp = another._head;
-			this->in_end(new note<T>(*temp));
+			this->push_end(new note<T>(*temp));
 			temp = temp->get_n();
 			while (temp != nullptr) {
 				note<T>* nw = new note<T>(*temp);
-				this->in_end(nw);
+				this->push_end(nw);
 				temp = temp->get_n();
 			}
 		}
 
+		twolist(int size) {
+			_head = nullptr;
+			_end = nullptr;
+			for (int i = 0; i < size; size++){this->push_end(new note<T>(new T(random())));}
+		}
 
+		T random() {
+			std::random_device random_device;
+			std::mt19937 generator(random_device());
+			std::uniform_int_distribution<> distribution(min, max);
+			T x = distribution(generator);
+			return x;
+		}
 
 		void push_head(note<T>* start) {
 			if (_head == nullptr) {
@@ -70,9 +82,9 @@ namespace spisok {
 				start->set_p(nullptr);
 			}
 			else{
-				_head->set_p(start);
 				start->set_p(nullptr);
-				start->set_n(_end);
+				start->set_n(_head);
+				_head->set_p(start);
 				_head = start; 
 			}
 		}
@@ -95,13 +107,13 @@ namespace spisok {
 		void push_head(twolist<T> start) {
 			start._end->set_n(_head);
 			_head->set_p(start._end);
-			_head = start;
+			_head = start._head;
 		}
 
 		void push_end(twolist<T> list) {
-			_end->set_n(list);
+			_end->set_n(list._head);
 			list._head->set_p(_end);
-			_end = list;
+			_end = list._end;
 		}
 
 		void pop_head() {
@@ -116,10 +128,10 @@ namespace spisok {
 
 
 		void deleate(T val) {
-			note<T> temp = _head;
+			note<T>* temp = _head;
 			int len = this->len();
 			for (int i = 0; i < len; i++) {
-				if (temp->get_v() == val) {
+				if (*(temp->get_v()) == val) {
 					if (temp == _head){this->pop_head();}
 					else {
 						if (temp == _end){ this->pop_end(); }
