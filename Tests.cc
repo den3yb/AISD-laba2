@@ -30,9 +30,9 @@ TEST(Tests1, twolist1) {
 }
 
 TEST(Tests2, summ) {
-	note<int> a(nullptr, nullptr, 4);
+	note<int> a(nullptr, nullptr, 9);
 	note<int> b(nullptr, nullptr, 2);
-	note<int> c(nullptr, nullptr, 5);
+	note<int> c(nullptr, nullptr, 9);
 	twolist<int> list1;
 	list1.push_end(&a);
 	list1.push_end(&b);
@@ -41,7 +41,7 @@ TEST(Tests2, summ) {
 	cout << list1 << "\n";
 	cout << list2 << "\n";
 	sum_num(&list1, &list2);
-	cout << list1 << "\n";
 	cout << list2 << "\n";
+	cout << list1 << "\n";
 	EXPECT_TRUE(true);
 }

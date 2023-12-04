@@ -18,14 +18,17 @@ namespace spisok {
 		note(T data) { _next = nullptr; _prev = nullptr; _val = new T(data); }
 		note(note* temp1, note* temp2, T data) { _next = temp1; _prev = temp2; _val = new T(data); }
 		note(note<T>& another) { _next = another._next; _prev = another._prev; _val = new T(*another._val); }
-		~note() { _next = nullptr; _prev = nullptr; delete _val; };
+		~note() = default;
 		note* get_n() { return _next; }
 		note* get_p() { return _prev; }
 		T* get_v() { return _val; }
 		void set_n(note* next) { _next = next; }
 		void set_p(note* prev) { _prev = prev; }
 		void set_v(T* val) { _val = val; }
-		friend ostream& operator<< (ostream& o, note<T>& t) { cout << *(t.get_v()) << " "; return o; }
+		friend ostream& operator<< (ostream& o, note<T>& t) { 
+			cout << *(t.get_v()) << " "; 
+			return o; 
+		}
 		friend bool operator== (note<T> rhs, note<T> lhs) {
 			if (*(rhs.get_v()) == *(lhs.get_v())) { return false; }
 			else { return true; }
@@ -180,18 +183,34 @@ namespace spisok {
 		}
 
 		note<T>* get_end() { return _end; }
+		note<T>* get_head() { return _head; }
 	};
 
-	void sum_num(twolist<int>* lhs, twolist<int>* rhs) {
-		note<int>* left = lhs->get_end();
-		note<int>* right = rhs->get_end();
+	template <typename T>
+	void sum_num(twolist<T>* lhs, twolist<T>* rhs) {
+		note<T>* left = lhs->get_end();
+		note<T>* right = rhs->get_end();
 		int overf = 0;
-		while (left != nullptr && right != nullptr) {
-			int a = *(left->get_v()) + *(right->get_v());
-			cout << a;
-			left->set_v(&a);
-			left = left->get_p();
-			right = right->get_p();
+		if (lhs->len() == rhs->len()) {	
+			while (left != nullptr && right != nullptr) {
+				if (*(left->get_v()) + *(right->get_v()) + overf > 9) {
+					int* a = new int(*(left->get_v()) + *(right->get_v()) + overf - 10);
+					left->set_v(a);
+					overf = 1;
+					left = left->get_p();
+					right = right->get_p();
+				}
+				else {
+					int* a = new int(*(left->get_v()) + *(right->get_v()) + overf);
+					left->set_v(a);
+					overf = 0;
+					left = left->get_p();
+					right = right->get_p();
+				}
+				
+			}
+			note<T> b(overf);
+			lhs->push_head(&b);
 		}
 		
 	}
