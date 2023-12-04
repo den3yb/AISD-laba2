@@ -25,9 +25,9 @@ namespace spisok {
 		void set_n(note* next) { _next = next; }
 		void set_p(note* prev) { _prev = prev; }
 		void set_v(T* val) { _val = val; }
-		friend ostream& operator<< (ostream& o, note<T>& t) { 
-			cout << *(t.get_v()) << " "; 
-			return o; 
+		friend ostream& operator<< (ostream& o, note<T>& t) {
+			cout << *(t.get_v()) << " ";
+			return o;
 		}
 		friend bool operator== (note<T> rhs, note<T> lhs) {
 			if (*(rhs.get_v()) == *(lhs.get_v())) { return false; }
@@ -186,33 +186,37 @@ namespace spisok {
 		note<T>* get_head() { return _head; }
 	};
 
-	template <typename T>
-	void sum_num(twolist<T>* lhs, twolist<T>* rhs) {
-		note<T>* left = lhs->get_end();
-		note<T>* right = rhs->get_end();
-		int overf = 0;
-		if (lhs->len() == rhs->len()) {	
-			while (left != nullptr && right != nullptr) {
-				if (*(left->get_v()) + *(right->get_v()) + overf > 9) {
-					int* a = new int(*(left->get_v()) + *(right->get_v()) + overf - 10);
-					left->set_v(a);
-					overf = 1;
-					left = left->get_p();
-					right = right->get_p();
-				}
-				else {
-					int* a = new int(*(left->get_v()) + *(right->get_v()) + overf);
-					left->set_v(a);
-					overf = 0;
-					left = left->get_p();
-					right = right->get_p();
-				}
-				
-			}
-			note<T> b(overf);
-			lhs->push_head(&b);
-		}
-		
-	}
+	class numbers : public twolist<int> {
+	public:
+		void sum(twolist<int>* rhs) {
+			note<int>* left = this->get_end();
+			note<int>* right = rhs->get_end();
+			int overf = 0;
+			if (this->len() == rhs->len()) {
+				while (left != nullptr && right != nullptr) {
+					if (*(left->get_v()) + *(right->get_v()) + overf > 9) {
+						int* a = new int(*(left->get_v()) + *(right->get_v()) + overf - 10);
+						left->set_v(a);
+						overf = 1;
+						left = left->get_p();
+						right = right->get_p();
+					}
+					else {
+						int* a = new int(*(left->get_v()) + *(right->get_v()) + overf);
+						left->set_v(a);
+						overf = 0;
+						left = left->get_p();
+						right = right->get_p();
+					}
 
-}
+				}
+				note<int> b(overf);
+				this->push_head(&b);
+			}
+
+
+
+		};
+
+	};
+};
