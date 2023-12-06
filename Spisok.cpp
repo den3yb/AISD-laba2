@@ -25,9 +25,9 @@ namespace spisok {
 		void set_n(note* next) { _next = next; }
 		void set_p(note* prev) { _prev = prev; }
 		void set_v(T* val) { _val = val; }
-		friend ostream& operator<< (ostream& o, note<T>& t) {
-			cout << *(t.get_v()) << " ";
-			return o;
+		friend ostream& operator<< (ostream& o, note<T>& t) { 
+			cout << *(t.get_v()) << " "; 
+			return o; 
 		}
 		friend bool operator== (note<T> rhs, note<T> lhs) {
 			if (*(rhs.get_v()) == *(lhs.get_v())) { return false; }
@@ -108,25 +108,27 @@ namespace spisok {
 			}
 		}
 
-		void push_head(twolist<T> start) {
-			start._end->set_n(_head);
-			_head->set_p(start._end);
-			_head = start._head;
+		void push_head(twolist<T>* start) {
+			start->_end->set_n(_head);
+			_head->set_p(start->_end);
+			_head = start->_head;
 		}
 
-		void push_end(twolist<T> list) {
-			_end->set_n(list._head);
-			list._head->set_p(_end);
-			_end = list._end;
+		void push_end(twolist<T>* list) {
+			_end->set_n(list->_head);
+			list->_head->set_p(_end);
+			_end = list->_end;
 		}
 
 		void pop_head() {
 			_head->get_n()->set_p(nullptr);
+			delete (_head);
 			_head = _head->get_n();
 		}
 
 		void pop_end() {
 			_end->get_p()->set_n(nullptr);
+			delete (_end);
 			_end = _end->get_p();
 		}
 
@@ -145,7 +147,7 @@ namespace spisok {
 							temp->get_n()->set_p(temp->get_p());
 						}
 					}
-
+					
 				}
 				temp = temp->get_n();
 			}
@@ -156,18 +158,18 @@ namespace spisok {
 		friend ostream& operator<< (ostream& out, twolist<T>& list) {
 			note<T>* start = list._head;
 			while (start != nullptr) {
-				cout << *start;
+				out << *start;
 				start = start->get_n();
 			}
 			return out;
 		}
 
-		note<T>* operator[](int index) {
+		T operator[](int index) {
 			note<T>* start = _head;
-			if (index > this->len()) { throw runtime_error("Index is out of range"); }
-			if (start == nullptr && index == 0) { return _head; }
+			if (index > this->len() || index < 0) { throw runtime_error("Index is out of range"); }
+			if (start != nullptr && index == 0) { return *(_head->get_v()); }
 			for (int i = 0; i < index; i++) { start = start->get_n(); }
-			return start;
+			return *(start->get_v());
 		}
 
 		int len() {
@@ -186,13 +188,36 @@ namespace spisok {
 		note<T>* get_head() { return _head; }
 	};
 
-	class numbers : public twolist<int> {
-	public:
-		void sum(twolist<int>* rhs) {
-			note<int>* left = this->get_end();
-			note<int>* right = rhs->get_end();
-			int overf = 0;
-			if (this->len() == rhs->len()) {
+	template <typename T>
+	twolist<int>* sum_num(twolist<T>* lhs, twolist<T>* rhs) {
+		note<T>* left = lhs->get_end();
+		note<T>* right = rhs->get_end();
+		int overf = 0;
+		if (lhs->len() == rhs->len()) {	
+			while (left != nullptr && right != nullptr) {
+				if (*(left->get_v()) + *(right->get_v()) + overf > 9) {
+					int* a = new int(*(left->get_v()) + *(right->get_v()) + overf - 10);
+					left->set_v(a);
+					overf = 1;
+					left = left->get_p();
+					right = right->get_p();
+				}
+				else {
+					int* a = new int(*(left->get_v()) + *(right->get_v()) + overf);
+					left->set_v(a);
+					overf = 0;
+					left = left->get_p();
+					right = right->get_p();
+				}
+			}
+			if (overf == 1) {
+				note<int>* temp = new note<int>(1);
+				lhs->push_head(temp);
+			}
+			return lhs;
+		}
+		else {
+			if (lhs->len() > rhs->len()) {
 				while (left != nullptr && right != nullptr) {
 					if (*(left->get_v()) + *(right->get_v()) + overf > 9) {
 						int* a = new int(*(left->get_v()) + *(right->get_v()) + overf - 10);
@@ -210,13 +235,36 @@ namespace spisok {
 					}
 
 				}
-				note<int> b(overf);
-				this->push_head(&b);
+				int* a = new int(*(left->get_v()) + overf);
+				left->set_v(a);
+				return lhs;
 			}
+			else {
+				while (left != nullptr && right != nullptr) {
+					if (*(left->get_v()) + *(right->get_v()) + overf > 9) {
+						int* a = new int(*(left->get_v()) + *(right->get_v()) + overf - 10);
+						right->set_v(a);
+						overf = 1;
+						left = left->get_p();
+						right = right->get_p();
+					}
+					else {
+						int* a = new int(*(left->get_v()) + *(right->get_v()) + overf);
+						right->set_v(a);
+						overf = 0;
+						left = left->get_p();
+						right = right->get_p();
+					}
 
+				}
+				int* a = new int(*(right->get_v()) + overf);
+				right->set_v(a);
+				return rhs;
+			}
+		}
+		
+	}
+	template <typename T>
+	twolist<int>* mul_num(twolist<T>* lhs, twolist<T>* rhs) {}
 
-
-		};
-
-	};
-};
+}
