@@ -154,7 +154,7 @@ namespace spisok {
 
 		friend ostream& operator<< (ostream& out, twolist<T>& list) {
 			note<T>* start = list._head;
-			while (start != nullptr) {
+			while (start != nullptr) {				
 				cout << *start;
 				start = start->get_n();
 			}
@@ -233,6 +233,39 @@ namespace spisok {
 			t.push_head(1);
 		}
 		return t;
+	}
+
+	template <typename T>
+	twolist<int> mul_num(twolist<T>* lhs, twolist<T>* rhs) {
+		twolist<int> res;
+		res.push_head(0);
+		note<int>* rt = rhs->get_end();
+		int count = 0;
+		while (rt != nullptr) {
+			int r = *(rt->get_v());
+			twolist<int> t;
+			
+			int of = 0;
+			note<int>* lt = lhs->get_end();
+			while (lt != nullptr) {
+				int l = *(lt->get_v());
+				t.push_head((l * r + of) % 10);
+				of = (l * r + of) / 10;
+				lt = lt->get_p();
+			}
+			if (of != 0) {
+				t.push_head(of);
+			}
+			for (int i = 0; i < count; i++) {
+				t.push_end(0);
+			}
+
+			cout << t << "\n";
+			res = sum_num(&res, &t);
+			count++;
+			rt = rt->get_p();
+		}
+		return res;
 	}
 
 }

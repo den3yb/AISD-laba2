@@ -109,3 +109,20 @@ TEST(Tests6, sum3) {
 	cout << list_s;
 	EXPECT_TRUE(true);
 }
+
+TEST(Tests7, mul) {
+	twolist<int> list1;
+	list1.push_end(8);
+	list1.push_end(9);
+	list1.push_end(4);
+	twolist<int> list2;
+	list2.push_end(4);
+	list2.push_end(5);
+	list2.push_end(6);
+	list2.push_end(8);
+	cout << list2 << "\n";
+	cout << list1 << "\n";
+	twolist<int> list_m = mul_num(&list1, &list2);
+	cout << list_m;
+	EXPECT_TRUE(true);
+}
