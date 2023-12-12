@@ -17,17 +17,19 @@ namespace spisok {
 		note() { _next = nullptr; _prev = nullptr; _val = nullptr; }
 		note(T data) { _next = nullptr; _prev = nullptr; _val = new T(data); }
 		note(note* temp1, note* temp2, T data) { _next = temp1; _prev = temp2; _val = new T(data); }
-		note(note<T>& another) { _next = another._next; _prev = another._prev; _val = new T(*another._val); }
+		note(const note<T>& another) { _next = another._next; _prev = another._prev; _val = new T(another._val); }
 		~note() = default;
 		note* get_n() { return _next; }
 		note* get_p() { return _prev; }
 		T* get_v() { return _val; }
 		void set_n(note* next) { _next = next; }
 		void set_p(note* prev) { _prev = prev; }
-		void set_v(T* val) { _val = val; }
-		friend ostream& operator<< (ostream& o, note<T>& t) { 
-			cout << *(t.get_v()) << " "; 
-			return o; 
+		void set_v(T val) {
+			_val = new T(val);
+		}
+		friend ostream& operator<< (ostream& o, note<T>& t) {
+			cout << *(t.get_v()) << " ";
+			return o;
 		}
 		friend bool operator== (note<T> rhs, note<T> lhs) {
 			if (*(rhs.get_v()) == *(lhs.get_v())) { return false; }
@@ -51,16 +53,7 @@ namespace spisok {
 		twolist() { _head = nullptr; _end = nullptr; }
 
 		twolist(const twolist& another) {
-			_head = nullptr;
-			_end = nullptr;
-			note<T>* temp = another._head;
-			this->push_end(new note<T>(*temp));
-			temp = temp->get_n();
-			while (temp != nullptr) {
-				note<T>* nw = new note<T>(*temp);
-				this->push_end(nw);
-				temp = temp->get_n();
-			}
+
 		}
 
 		twolist(int size, T min, T max) {
@@ -78,7 +71,8 @@ namespace spisok {
 			return x;
 		}
 
-		void push_head(note<T>* start) {
+		void push_head(T value) {
+			note<T>* start = new note<T>(value);
 			if (_head == nullptr) {
 				_head = start;
 				_end = start;
@@ -93,7 +87,8 @@ namespace spisok {
 			}
 		}
 
-		void push_end(note<T>* tail) {
+		void push_end(T value) {
+			note<T>* tail = new note<T>(value);
 			if (_end == nullptr) {
 				_head = tail;
 				_end = tail;
@@ -121,15 +116,17 @@ namespace spisok {
 		}
 
 		void pop_head() {
+			note<T>* temp(_head);
 			_head->get_n()->set_p(nullptr);
-			delete (_head);
 			_head = _head->get_n();
+			delete temp->get_v();
 		}
 
 		void pop_end() {
+			note<T>* temp(_end);
 			_end->get_p()->set_n(nullptr);
-			delete (_end);
 			_end = _end->get_p();
+			delete temp->get_v();
 		}
 
 
@@ -147,7 +144,7 @@ namespace spisok {
 							temp->get_n()->set_p(temp->get_p());
 						}
 					}
-					
+
 				}
 				temp = temp->get_n();
 			}
@@ -158,7 +155,7 @@ namespace spisok {
 		friend ostream& operator<< (ostream& out, twolist<T>& list) {
 			note<T>* start = list._head;
 			while (start != nullptr) {
-				out << *start;
+				cout << *start;
 				start = start->get_n();
 			}
 			return out;
@@ -189,82 +186,53 @@ namespace spisok {
 	};
 
 	template <typename T>
-	twolist<int>* sum_num(twolist<T>* lhs, twolist<T>* rhs) {
-		note<T>* left = lhs->get_end();
-		note<T>* right = rhs->get_end();
-		int overf = 0;
-		if (lhs->len() == rhs->len()) {	
-			while (left != nullptr && right != nullptr) {
-				if (*(left->get_v()) + *(right->get_v()) + overf > 9) {
-					int* a = new int(*(left->get_v()) + *(right->get_v()) + overf - 10);
-					left->set_v(a);
-					overf = 1;
-					left = left->get_p();
-					right = right->get_p();
-				}
-				else {
-					int* a = new int(*(left->get_v()) + *(right->get_v()) + overf);
-					left->set_v(a);
-					overf = 0;
-					left = left->get_p();
-					right = right->get_p();
-				}
-			}
-			if (overf == 1) {
-				note<int>* temp = new note<int>(1);
-				lhs->push_head(temp);
-			}
-			return lhs;
-		}
-		else {
-			if (lhs->len() > rhs->len()) {
-				while (left != nullptr && right != nullptr) {
-					if (*(left->get_v()) + *(right->get_v()) + overf > 9) {
-						int* a = new int(*(left->get_v()) + *(right->get_v()) + overf - 10);
-						left->set_v(a);
-						overf = 1;
-						left = left->get_p();
-						right = right->get_p();
-					}
-					else {
-						int* a = new int(*(left->get_v()) + *(right->get_v()) + overf);
-						left->set_v(a);
-						overf = 0;
-						left = left->get_p();
-						right = right->get_p();
-					}
-
-				}
-				int* a = new int(*(left->get_v()) + overf);
-				left->set_v(a);
-				return lhs;
+	twolist<int> sum_num(twolist<T>* lhs, twolist<T>* rhs) {
+		twolist<int> t;
+		int of = 0;
+		note<int>* rt = rhs->get_end();
+		note<int>* lt = lhs->get_end();
+		while (rt != nullptr && lt != nullptr) {
+			int r = *(rt->get_v());
+			int l = *(lt->get_v());
+			if (r + l + of > 9) {
+				t.push_head(r + l + of - 10);
+				of = 1;
 			}
 			else {
-				while (left != nullptr && right != nullptr) {
-					if (*(left->get_v()) + *(right->get_v()) + overf > 9) {
-						int* a = new int(*(left->get_v()) + *(right->get_v()) + overf - 10);
-						right->set_v(a);
-						overf = 1;
-						left = left->get_p();
-						right = right->get_p();
-					}
-					else {
-						int* a = new int(*(left->get_v()) + *(right->get_v()) + overf);
-						right->set_v(a);
-						overf = 0;
-						left = left->get_p();
-						right = right->get_p();
-					}
-
-				}
-				int* a = new int(*(right->get_v()) + overf);
-				right->set_v(a);
-				return rhs;
+				t.push_head(r + l + of);
+				of = 0;
 			}
+			rt = rt->get_p();
+			lt = lt->get_p();
 		}
-		
+		while (rt != nullptr) {
+			int r = *(rt->get_v());
+			if (r + of > 9) {
+				t.push_head(r + of - 10);
+				of = 1;
+			}
+			else {
+				t.push_head(r + of);
+				of = 0;
+			}
+			rt = rt->get_p();
+		}
+		while (lt != nullptr) {
+			int l = *(lt->get_v());
+			if (l + of > 9) {
+				t.push_head(l + of - 10);
+				of = 1;
+			}
+			else {
+				t.push_head(l + of);
+				of = 0;
+			}
+			lt = lt->get_p();
+		}
+		if (of == 1) {
+			t.push_head(1);
+		}
+		return t;
 	}
-	template <typename T>
-	twolist<int>* mul_num(twolist<T>* lhs, twolist<T>* rhs) {}
 
 }
